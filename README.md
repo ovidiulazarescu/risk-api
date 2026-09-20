@@ -24,6 +24,33 @@ curl -X POST localhost:8080/score \
   -d '{"credit_utilization": 0.3, "payment_history_score": 90, "debt_to_income": 0.25}'
 ```
 
+## Example request
+
+`POST /score` takes three fields and returns a score (300-850) and a risk band. Replace `$SERVICE_URL`
+with `http://localhost:8080` locally, or with the `service_url` Terraform output once deployed
+(e.g. `https://<id>.eu-central-1.awsapprunner.com`).
+
+| Field | Type | Range |
+|---|---|---|
+| `credit_utilization` | float | 0.0 - 1.0 |
+| `payment_history_score` | int | 0 - 100 |
+| `debt_to_income` | float | 0.0 - 1.0 |
+
+```bash
+curl -X POST "$SERVICE_URL/score" \
+  -H "Content-Type: application/json" \
+  -d '{"credit_utilization": 0.1, "payment_history_score": 95, "debt_to_income": 0.15}'
+```
+
+Response:
+
+```json
+{"score": 615, "risk_band": "medium"}
+```
+
+Bands: `low` >= 700, `medium` >= 580, otherwise `high`. Health check: `GET $SERVICE_URL/healthz`.
+Interactive API docs are served at `$SERVICE_URL/docs`.
+
 ## Deploy to GCP
 
 1. `infra/gcp/main.tf`: set the GCS state bucket, and set up a Workload Identity Federation pool +
