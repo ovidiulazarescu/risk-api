@@ -25,7 +25,8 @@ data "aws_iam_policy_document" "github_actions_assume" {
     condition {
       test     = "StringLike"
       variable = "token.actions.githubusercontent.com:sub"
-      values   = ["repo:ovidiulazarescu/risk-api:ref:refs/heads/main"]
+      # GitHub's sub claim carries immutable owner and repo IDs: repo:<owner>@<owner-id>/<repo>@<repo-id>:ref:...
+      values = ["repo:ovidiulazarescu@69583998/risk-api@1378564818:ref:refs/heads/main"]
     }
   }
 }
