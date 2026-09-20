@@ -9,6 +9,7 @@ on:
       - "requirements.txt"
       - "infra/aws/**"
       - ".github/workflows/deploy-aws.yml"
+  workflow_dispatch: # enables the manual "Run workflow" button
 
 permissions:
   contents: read
