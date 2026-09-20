@@ -104,7 +104,6 @@ applying. The `/score` endpoint is public and unauthenticated.
 
 - Both deploy workflows use OIDC federation — no long-lived cloud credentials stored in GitHub.
 - App Runner has no true scale-to-zero (min instance count of 1); Cloud Run does. That's the one
-  real cost/behavior difference between the two stacks worth knowing for an interview conversation.
+  real cost/behavior difference between the two stacks.
 - The `google_cloud_run_v2_service_iam_member` and App Runner instance role are both locked down by
-  default — widen them deliberately, not by default, for anything resembling a real financial
-  workload.
+  default.
