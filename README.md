@@ -40,13 +40,15 @@ locking, so no DynamoDB table is needed. Requires Terraform >= 1.12.2 and admin 
 one-time setup below (`aws login`).
 
 1. **State bucket** (once): `cd infra/aws-bootstrap && terraform init && terraform apply`. The bucket name
-   must match the `bucket` in the backend block of `infra/aws/main.tf` (currently `tf-state-401323565803`).
+   is passed to `terraform init` via `-backend-config` (the backend block in `infra/aws/main.tf` has no
+   hardcoded bucket). Set your account ID once in your shell:
+   `export ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)`.
 2. **Bootstrap the stack** (once, from your machine): the GitHub OIDC provider and the
    `github-actions-deployer` role must exist before Actions can assume it, and App Runner needs an image
    in ECR before its service can be created.
    ```bash
    cd infra/aws
-   terraform init
+   terraform init -backend-config="bucket=tf-state-$ACCOUNT_ID"
    terraform apply \
      -target=aws_ecr_repository.risk_api \
      -target=aws_iam_role_policy.deployer_terraform \
@@ -54,14 +56,16 @@ one-time setup below (`aws login`).
 
    # push a first image
    aws ecr get-login-password --region eu-central-1 | \
-     docker login --username AWS --password-stdin 401323565803.dkr.ecr.eu-central-1.amazonaws.com
-   docker build --platform linux/amd64 -t 401323565803.dkr.ecr.eu-central-1.amazonaws.com/risk-api:bootstrap .
-   docker push 401323565803.dkr.ecr.eu-central-1.amazonaws.com/risk-api:bootstrap
+     docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.eu-central-1.amazonaws.com
+   docker build --platform linux/amd64 -t $ACCOUNT_ID.dkr.ecr.eu-central-1.amazonaws.com/risk-api:bootstrap .
+   docker push $ACCOUNT_ID.dkr.ecr.eu-central-1.amazonaws.com/risk-api:bootstrap
 
    terraform apply -var="image_tag=bootstrap"
    ```
-3. The GitHub repo (`ovidiulazarescu/risk-api`) and account ID are already set in
-   `infra/aws/github-oidc.tf` and `.github/workflows/deploy-aws.yml`. Change them if you fork.
+3. In the GitHub repo, add a repository **variable** (Settings > Secrets and variables > Actions >
+   Variables) named `AWS_ACCOUNT_ID` with your account ID. The workflow uses it for the role ARN and
+   the state bucket name. The repo name (`ovidiulazarescu/risk-api`) is set in `infra/aws/github-oidc.tf`;
+   change it if you fork.
 4. Push to `main`. The workflow builds the image, pushes it to ECR tagged with the commit SHA, and runs
    `terraform apply`. The service URL is the `service_url` Terraform output.
 

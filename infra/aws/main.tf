@@ -11,7 +11,8 @@ terraform {
     }
   }
   backend "s3" {
-    bucket       = "tf-state-401323565803" # created by infra/aws-bootstrap
+    # bucket is supplied at init time: -backend-config="bucket=tf-state-<account-id>"
+    # (the bucket is created by infra/aws-bootstrap)
     key          = "risk-api/terraform.tfstate"
     region       = "eu-central-1"
     use_lockfile = true # S3 native locking, no DynamoDB table needed
