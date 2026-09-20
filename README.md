@@ -63,7 +63,7 @@ Interactive API docs are served at `$SERVICE_URL/docs`.
 ## Deploy to AWS
 
 Region: `eu-central-1`. Terraform state lives in an S3 bucket (`tf-state-<account-id>`) with S3 native
-locking, so no DynamoDB table is needed. Requires Terraform >= 1.12.2 and admin AWS credentials for the
+locking. Requires Terraform >= 1.12.2 and admin AWS credentials for the
 one-time setup below (`aws login`).
 
 1. **State bucket** (once): `cd infra/aws-bootstrap && terraform init && terraform apply`. The bucket name
